@@ -8,8 +8,8 @@ let c1; let c2;
 function setup() { 
   createCanvas(windowWidth, windowHeight);
   initializeElements();
-  c1 = color(20, 0, 20);
-  c2 = color(153, 121, 80);
+  c1 = color(50, 0, 50);
+  c2 = color(250, 200, 200);
 
 }
 
@@ -26,6 +26,7 @@ function initializeElements() {
       let y = row * gridSize + random(gridSize * 0.2, gridSize * 0.8);
       let r = random(50, 100);
       let leafCount = random(8, 15);
+      let noiseOffset = random(300);
     
       // Check if this circle overlaps with any previous circle in `circles`
       let overlapping = false;
@@ -43,7 +44,7 @@ function initializeElements() {
         let colors = Object.fromEntries(
           colorKeys.map(key => [key, colourPalette[floor(random(colourPalette.length))]])
         );
-        circles.push({ x, y, r, leafCount,colors });
+        circles.push({ x, y, r, leafCount, colors, noiseOffset});
       }
     }
   }
@@ -59,13 +60,13 @@ function initializeElements() {
 
 // Main drawing function
 function draw() {
-  background(80, 50, 150, 100); // Set background color
-  setGradientBlock(0, width / 2, 0, height, c1, c2, 100);
-  setGradientBlock(width / 2, width, 0, height, c2, c1, 100);
+  background(20, 0, 80, 100); // Set background color
+  setGradientBlock(0, width / 2, 0, height, c2, c1, 100); //set two blocks woth gradient colour
+  setGradientBlock(width / 2, width, 0, height, c1, c2, 100);
 
-  // Scale mouse to control flower size
-  let diameter = map(mouseY, 0, height, 0.8, 1.5); //let the change of mouseY will change the flowers' size
-  let leafnum = map(mouseX, 0, width, 1, 1.2); //let the change of mouseX will change the number of leaf
+  // Scale mouseX and Y to control flower size
+  let diameter = map(mouseY, 0, height, 0.8, 1.5); 
+  let leafnum = map(mouseX, 0, width, 1, 1.2);
 
   for (let i = 0; i < circles.length; i++) {
     /* 
@@ -76,30 +77,34 @@ function draw() {
     4, leaflength: number of the flower leaves
     5, colors: color pallet for the flower
      */ 
-    drawFlower(circles[i].x, circles[i].y, circles[i].leafCount * leafnum, circles[i].r * diameter, circles[i].colors); 
-  }
+    drawFlower(circles[i].x, circles[i].y, circles[i].leafCount * leafnum, circles[i].r * diameter, circles[i].colors, circles[i].noiseOffset); 
+    // Let the move of mouseY change the flowers' size
+    // Let the move of mouseX change the leaf to make a spining effect
+    circles[i].noiseOffset += 0.01; // Update noise offset for growth animation
+  } 
   drawDots();
 }
 
 // Draw flowers
-function drawFlower(x, y, leafCount, leafLength, colors) {
+function drawFlower(x, y, leafCount, leafLength, colors, noiseOffset) {
   push();
   translate(x, y);
   let angleStep = 360 / leafCount; // Rotation angle per leaf
-
+  let growth = map(noise(noiseOffset), 0, 1, 0.8, 1.5)
+  let leaveGrowing = leafLength * growth
   // Draw leaves
   for (let i = 0; i < leafCount; i++) {
-    drawLeaves(angleStep, leafLength,colors); // Pass leaf length to drawing function
+    drawLeaves(angleStep, leaveGrowing, colors, noiseOffset + i * 0.1); // Pass leaf length to drawing function
   }
   // Draw central sphere
   fill(color(colors.flower));
   noStroke();
-  ellipse(0, 0, centerSphereSize, centerSphereSize); // Draw central sphere
+  ellipse(0, 0, centerSphereSize * growth, centerSphereSize * growth); // Draw central sphere
 
   pop();
 }
 
-// Draw flowers
+// Draw Leaves
 function drawLeaves(angle, leafLength,colors) {
   let segments = 15; // number of segments per the length of the leaf (curve)
   let px, py;
@@ -143,7 +148,6 @@ function createRandomDotsAttributes() {
     noiseOffset: random(300) // Random noise offset for unique movement
   };
 }
-//////
 
 // Initialize background dots
 function initializeDots(numDots) {
