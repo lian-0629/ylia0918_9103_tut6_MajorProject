@@ -56,6 +56,7 @@ function initializeElements() {
   // Initialize background dots
   let numDots = int(width/5);
   dots = [];
+  // Push new dots when there're dots moving out of the boundries
   for (let i = 0; i < numDots; i++){
     dots.push(new dot());
   }
@@ -98,8 +99,8 @@ function drawFlower(x, y, leafCount, leafLength, colors, noiseOffset) {
   push();
   translate(x, y);
   let angleStep = 360 / leafCount; // Rotation angle per leaf
-  let growth = map(noise(noiseOffset), 0, 1, 0.8, 1.2)
-  let radiusGrowing = leafLength * growth
+  let growth = map(noise(noiseOffset), 0, 1, 0.8, 1.2);
+  let radiusGrowing = leafLength * growth;
 
   // Draw leaves
   for (let i = 0; i < leafCount; i++) {
@@ -153,11 +154,17 @@ function randomColor() {
   return colourPalette[floor(random(colourPalette.length))];
 }
 
-// Initialize background dots
-function initializeDots(numDots) {
-  dots = [];
-  for (let i = 0; i < numDots; i++) {
-    dots.push(createRandomDotsAttributes());
+class dot {
+  constructor() {
+    this.redraw();
+  }
+
+  redraw(){
+    this.x = random(width); // Random X-coordinate
+    this.y = random(height); // Random Y-coordinate
+    this.size = random(5, 15); // Set dot size between 5 and 15
+    this.chosenColor = randomColor(); // Randomly select color from color pallet
+    this.noiseOffset = random(300); // Random noise offset for unique movement
   }
 
   update(){
