@@ -3,10 +3,14 @@ const colorKeys = ["flower", "leaves", "endLeaves", "endLeavesStroke"];
 let circles = [];
 let dots = [];
 let centerSphereSize,endSphereSize,endSphereStroke;
+let c1; let c2;
 
 function setup() { 
   createCanvas(windowWidth, windowHeight);
   initializeElements();
+  c1 = color(20, 0, 20);
+  c2 = color(153, 121, 80);
+
 }
 
 function initializeElements() {
@@ -55,8 +59,10 @@ function initializeElements() {
 
 // Main drawing function
 function draw() {
-  background(251, 176, 59); // Set background color
-  
+  background(80, 50, 150, 100); // Set background color
+  setGradientBlock(0, width / 2, 0, height, c1, c2, 100);
+  setGradientBlock(width / 2, width, 0, height, c2, c1, 100);
+
   for (let i = 0; i < circles.length; i++) {
     /* 
     INPUT PARAM:
@@ -168,4 +174,14 @@ function windowResized() {
   initializeElements(); // Reinitialize elements for new window size
 
   endSphereStroke = min(windowWidth, windowHeight) / 250; 
+}
+
+function setGradientBlock(min, max, y, h, c1, c2, alpha) {
+  for (let i = min; i <= max; i++) {
+    let amt = map(i, min, max, 0, 1);
+    let c3 = lerpColor(c1, c2, amt);
+    c3.setAlpha(alpha);
+    stroke(c3);
+    line(i, y, i, y + h);
+  }
 }
