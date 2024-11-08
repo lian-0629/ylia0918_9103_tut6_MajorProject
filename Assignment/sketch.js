@@ -25,7 +25,7 @@ function initializeElements() {
       let x = col * gridSize + random(gridSize * 0.2, gridSize * 0.8);
       let y = row * gridSize + random(gridSize * 0.2, gridSize * 0.8);
       let r = random(50, 100);
-      let leafCount = random(8, 15);
+      leafCount = Math.floor(random(8,15));
       let noiseOffset = random(300);
     
       // Check if this circle overlaps with any previous circle in `circles`
@@ -90,7 +90,7 @@ function drawFlower(x, y, leafCount, leafLength, colors, noiseOffset) {
   push();
   translate(x, y);
   let angleStep = 360 / leafCount; // Rotation angle per leaf
-  let growth = map(noise(noiseOffset), 0, 1, 0.8, 1.5)
+  let growth = map(noise(noiseOffset), 0, 1, 0.8, 1.2)
   let leaveGrowing = leafLength * growth
   // Draw leaves
   for (let i = 0; i < leafCount; i++) {
@@ -105,7 +105,7 @@ function drawFlower(x, y, leafCount, leafLength, colors, noiseOffset) {
 }
 
 // Draw Leaves
-function drawLeaves(angle, leafLength,colors) {
+function drawLeaves(angle, leafLength, colors, leafNoiseOffset) {
   let segments = 15; // number of segments per the length of the leaf (curve)
   let px, py;
 
@@ -113,8 +113,12 @@ function drawLeaves(angle, leafLength,colors) {
   strokeWeight(5);  // Set leaf stem line width thicker
   stroke(color(colors.leaves));
 
-  rotate(angle); // Rotate leaf to respective angle
-  noFill(); // Ensure stem part is not filled
+  //rotate(angle); // Rotate leaf to respective angle
+  //noFill(); // Ensure stem part is not filled
+
+  let swingAngle = angle + map(noise(leafNoiseOffset), 0, 1, -5, 10);
+  rotate(swingAngle);
+  noFill();
 
   beginShape();
   // leaf curve
@@ -191,5 +195,12 @@ function setGradientBlock(min, max, y, h, c1, c2, alpha) {
     c3.setAlpha(alpha);
     stroke(c3);
     line(i, y, i, y + h);
+  }
+}
+
+// Save the art work as an jpg image
+function keyTyped() {
+  if (key === "s") {
+    save("NtangeII_Grass_new.jpg");
   }
 }
