@@ -2,15 +2,14 @@ const colourPalette = ['#E54379', '#CB010B', '#782221', 'purple'];
 const colorKeys = ["flower", "leaves", "endLeaves", "endLeavesStroke"];
 let circles = [];
 let dots = [];
-let centerSphereSize,endSphereSize,endSphereStroke;
-let c1; let c2;
+let centerSphereSize, endSphereSize, endSphereStroke;
+let c1, c2;
 
 function setup() { 
   createCanvas(windowWidth, windowHeight);
   initializeElements();
   c1 = color(50, 0, 50);
   c2 = color(250, 200, 200);
-
 }
 
 function initializeElements() {
@@ -55,14 +54,18 @@ function initializeElements() {
   endSphereStroke = endSphereSize/3; // size of the circle stroke in the end of the leaves
 
   // Initialize background dots
-  initializeDots(int((width*height)/800));
+  let numDots = int(width/5);
+  dots = [];
+  for (let i = 0; i < numDots; i++){
+    dots.push(new dot());
+  }
 }
 
 // Main drawing function
 function draw() {
-  background(20, 0, 80, 100); // Set background color
-  setGradientBlock(0, width / 2, 0, height, c2, c1, 100); //set two blocks woth gradient colour
-  setGradientBlock(width / 2, width, 0, height, c1, c2, 100);
+  background(20, 0, 50); // Set background color
+  setGradientBlock(0, width / 2, 0, height, c2, c1, 80); //set two blocks with gradient colour, adding deepth on the background
+  setGradientBlock(width / 2, width, 0, height, c1, c2, 80);
 
   // Scale mouseX and Y to control flower size
   let diameter = map(mouseY, 0, height, 0.8, 1.5); 
@@ -82,7 +85,12 @@ function draw() {
     // Let the move of mouseX change the leaf to make a spining effect
     circles[i].noiseOffset += 0.01; // Update noise offset for growth animation
   } 
-  drawDots();
+
+  // Draw dots
+  for(let dot of dots){
+    dot.update();
+    dot.draw();
+  }
 }
 
 // Draw flowers
@@ -91,10 +99,11 @@ function drawFlower(x, y, leafCount, leafLength, colors, noiseOffset) {
   translate(x, y);
   let angleStep = 360 / leafCount; // Rotation angle per leaf
   let growth = map(noise(noiseOffset), 0, 1, 0.8, 1.2)
-  let leaveGrowing = leafLength * growth
+  let radiusGrowing = leafLength * growth
+
   // Draw leaves
   for (let i = 0; i < leafCount; i++) {
-    drawLeaves(angleStep, leaveGrowing, colors, noiseOffset + i * 0.1); // Pass leaf length to drawing function
+    drawLeaves(angleStep, radiusGrowing, colors, noiseOffset + i * 0.1); // Pass leaf length to drawing function
   }
   // Draw central sphere
   fill(color(colors.flower));
@@ -143,15 +152,6 @@ function drawEndLeaf(x, y,colors) {
 function randomColor() {
   return colourPalette[floor(random(colourPalette.length))];
 }
-function createRandomDotsAttributes() {
-  return {
-    x: random(width), // Random X-coordinate
-    y: random(height), // Random Y-coordinate
-    size: random(5, 15), // Set dot size between 5 and 15
-    chosenColor: randomColor(), // Randomly select color from color pallet
-    noiseOffset: random(300) // Random noise offset for unique movement
-  };
-}
 
 // Initialize background dots
 function initializeDots(numDots) {
@@ -159,25 +159,25 @@ function initializeDots(numDots) {
   for (let i = 0; i < numDots; i++) {
     dots.push(createRandomDotsAttributes());
   }
-}
 
-// Draw and Move dots
-function drawDots() {
-  noStroke(); // Remove outline
-  for (let dot of dots) {
-    fill(dot.chosenColor);
-      
+  update(){
     // Update position using Perlin noise and constrain within boundaries
-    dot.x += map(noise(dot.noiseOffset), 0, 1, -2, 2);
-    dot.y += map(noise(dot.noiseOffset + 100), 0, 1, -2, 2);
+    this.x += map(noise(this.noiseOffset), 0, 1, -2, 2);
+    this.y += map(noise(this.noiseOffset + 100), 0, 1, -2, 2);
+    this.noiseOffset += 0.01; // Increase noise offset for smooth movement
 
-    ellipse(dot.x, dot.y, dot.size * 0.5, dot.size * 0.5); // Shrink dot size and draw
-    dot.noiseOffset += 0.01; // Increase noise offset for smooth movement
-  
-    // Keep dots within canvas boundaries
-    if (dot.x < 0 || width < dot.x || dot.y < 0 || height < dot.y){
-      dot = createRandomDotsAttributes();
+    // Call redraw() when dots floating beyond boundaries
+    if (this.x < 0 || width < this.x || this.y < 0 || height < this.y){
+      this.redraw();
     }
+  }
+
+  draw(){
+    fill(this.chosenColor);
+    noStroke();
+    ellipse(this.x, this.y, this.size * random(0, 1), this.size * random(0, 1));
+    // Shrink dot size and draw
+    // Add randomness to the size and it will change while the canvas reframing, making dots look like sparkling
   }
 }
 
@@ -188,6 +188,7 @@ function windowResized() {
   endSphereStroke = min(windowWidth, windowHeight) / 250; 
 }
 
+// Set a function to create gradient effect in the background
 function setGradientBlock(min, max, y, h, c1, c2, alpha) {
   for (let i = min; i <= max; i++) {
     let amt = map(i, min, max, 0, 1);
@@ -198,7 +199,7 @@ function setGradientBlock(min, max, y, h, c1, c2, alpha) {
   }
 }
 
-// Save the art work as an jpg image
+// Save the art work as a jpg image
 function keyTyped() {
   if (key === "s") {
     save("NtangeII_Grass_new.jpg");
