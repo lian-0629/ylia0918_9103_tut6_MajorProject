@@ -63,6 +63,10 @@ function draw() {
   setGradientBlock(0, width / 2, 0, height, c1, c2, 100);
   setGradientBlock(width / 2, width, 0, height, c2, c1, 100);
 
+  // Scale mouse to control flower size
+  let diameter = map(mouseY, 0, height, 0.8, 1.5); //let the change of mouseY will change the flowers' size
+  let leafnum = map(mouseX, 0, width, 1, 1.2); //let the change of mouseX will change the number of leaf
+
   for (let i = 0; i < circles.length; i++) {
     /* 
     INPUT PARAM:
@@ -72,7 +76,7 @@ function draw() {
     4, leaflength: number of the flower leaves
     5, colors: color pallet for the flower
      */ 
-    drawFlower(circles[i].x, circles[i].y, circles[i].leafCount, circles[i].r, circles[i].colors); 
+    drawFlower(circles[i].x, circles[i].y, circles[i].leafCount * leafnum, circles[i].r * diameter, circles[i].colors); 
   }
   drawDots();
 }
